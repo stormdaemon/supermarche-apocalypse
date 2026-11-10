@@ -1,0 +1,398 @@
+/* Full-screen menus: title, pause and game over receipt. Layers live in the fullscreen UI slot. */
+
+#app canvas {
+  transition: filter 0.4s ease;
+}
+
+body.menus-grey #app canvas {
+  filter: grayscale(1) brightness(0.8) contrast(1.05);
+}
+
+.menus-layer {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px 16px;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.menus-layer[hidden] {
+  display: none;
+}
+
+.menus-button {
+  font: inherit;
+  font-size: 22px;
+  font-weight: 900;
+  padding: 14px 28px;
+  border: 3px solid #1b1b24;
+  border-radius: 999px;
+  background: #ffe066;
+  color: #1b1b24;
+  box-shadow: 0 6px 0 #b8900c;
+  cursor: pointer;
+}
+
+.menus-button:hover {
+  filter: brightness(1.05);
+}
+
+.menus-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b8900c;
+}
+
+.menus-button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.menus-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+.menus-button-secondary {
+  background: #f4f4f8;
+  box-shadow: 0 6px 0 #8d8da3;
+}
+
+.menus-button-secondary:active {
+  box-shadow: 0 2px 0 #8d8da3;
+}
+
+/* Title screen */
+
+.menus-title {
+  background:
+    radial-gradient(ellipse at 50% 0%, #3a2f5c 0%, transparent 60%),
+    linear-gradient(180deg, #14121f 0%, #1d1a2e 100%);
+}
+
+.menus-sign {
+  margin: 0;
+  font-size: clamp(28px, 8vw, 54px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: #ffe066;
+  text-shadow:
+    4px 4px 0 #1b1b24,
+    -2px -2px 0 #1b1b24;
+}
+
+.menus-tagline,
+.menus-best {
+  margin: 0;
+  font-size: 16px;
+  color: #d8d4ea;
+}
+
+.menus-best {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.menus-facade {
+  --menus-door-ms: 1400ms;
+
+  position: relative;
+  width: min(86vw, 400px);
+  height: 260px;
+  overflow: hidden;
+  border: 10px solid #5b5f6e;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #2b2a3d 0%, #3c3a52 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.menus-crowd {
+  position: absolute;
+  inset: 0;
+}
+
+.menus-person {
+  position: absolute;
+  bottom: -4px;
+  left: var(--x);
+  width: 64px;
+  height: var(--h);
+  transform-origin: 50% 100%;
+  animation: menus-jostle 0.55s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.menus-body {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 52px;
+  bottom: 0;
+  border-radius: 22px 22px 6px 6px;
+  background: var(--shirt);
+}
+
+.menus-head {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  width: 40px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--skin);
+}
+
+.menus-eye {
+  position: absolute;
+  top: 17px;
+  width: 5px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1b1b24;
+}
+
+.menus-eye-left {
+  left: 10px;
+}
+
+.menus-eye-right {
+  right: 10px;
+}
+
+.menus-mouth {
+  position: absolute;
+  top: 29px;
+  left: 15px;
+  width: 10px;
+  height: var(--mouth);
+  border-radius: 0 0 8px 8px;
+  background: #5a1a1a;
+}
+
+/* Hands flattened against the glass */
+.menus-hand {
+  position: absolute;
+  top: 40px;
+  width: 14px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--skin);
+  transform: scale(1.2, 0.6);
+}
+
+.menus-hand-left {
+  left: -6px;
+}
+
+.menus-hand-right {
+  right: -6px;
+}
+
+@keyframes menus-jostle {
+  from {
+    transform: translate(-1.5px, 0) rotate(-1.5deg);
+  }
+  to {
+    transform: translate(1.5px, -1px) rotate(1.5deg);
+  }
+}
+
+.menus-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: linear-gradient(
+    115deg,
+    rgba(190, 230, 255, 0.28) 0%,
+    rgba(190, 230, 255, 0.08) 38%,
+    rgba(255, 255, 255, 0.22) 48%,
+    rgba(190, 230, 255, 0.06) 62%,
+    rgba(190, 230, 255, 0.2) 100%
+  );
+  box-shadow: inset 0 0 0 3px rgba(200, 220, 235, 0.55);
+  transition: transform var(--menus-door-ms) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.menus-door-left {
+  left: 0;
+}
+
+.menus-door-right {
+  right: 0;
+}
+
+.menus-facade.is-open .menus-door-left {
+  transform: translateX(-101%);
+}
+
+.menus-facade.is-open .menus-door-right {
+  transform: translateX(101%);
+}
+
+.menus-handle {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 46px;
+  margin-top: -23px;
+  border-radius: 3px;
+  background: #c9d3dc;
+}
+
+.menus-handle-left {
+  right: 14px;
+}
+
+.menus-handle-right {
+  left: 14px;
+}
+
+/* Pause screen */
+
+.menus-pause {
+  background: rgba(20, 18, 31, 0.35);
+}
+
+.menus-heading {
+  margin: 0;
+  font-size: clamp(34px, 9vw, 64px);
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 4px 4px 0 #1b1b24;
+}
+
+.menus-hint {
+  margin: 0;
+  font-size: 16px;
+  color: #ffffff;
+  opacity: 0.8;
+}
+
+.menus-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(80vw, 280px);
+}
+
+.menus-actions .menus-button {
+  width: 100%;
+}
+
+/* Game over receipt */
+
+.menus-receipt-layer {
+  background: rgba(10, 9, 16, 0.72);
+}
+
+.menus-receipt {
+  position: relative;
+  box-sizing: border-box;
+  width: min(100%, 340px);
+  margin: auto;
+  padding: 22px 20px 30px;
+  background: #fbfbf7;
+  color: #1d1d1d;
+  font-family: ui-monospace, Consolas, 'Courier New', monospace;
+  font-size: 15px;
+  text-align: left;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  transform: translateY(-115%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.menus-receipt.is-out {
+  transform: none;
+}
+
+.menus-line {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+  pointer-events: none;
+}
+
+.menus-line.is-printed {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.menus-receipt-center {
+  text-align: center;
+}
+
+.menus-receipt-brand {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.menus-receipt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 2px dotted #7a7a7a;
+}
+
+.menus-receipt-value {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.menus-receipt-sep {
+  height: 0;
+  margin: 10px 0;
+  border-top: 2px dashed #333333;
+}
+
+.menus-stamp {
+  display: block;
+  width: fit-content;
+  margin: 12px auto;
+  padding: 6px 12px;
+  border: 3px solid #d62828;
+  color: #d62828;
+  font-weight: 900;
+  rotate: -6deg;
+}
+
+.menus-receipt .menus-button {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  font-size: 18px;
+  padding: 12px 16px;
+}
+
+/* Torn bottom edge: downward paper teeth drawn as an SVG tile */
+.menus-tear {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M0 0H16L8 12Z' fill='%23fbfbf7'/%3E%3C/svg%3E")
+    repeat-x 0 0 / 16px 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menus-person {
+    animation: none;
+  }
+
+  .menus-door,
+  .menus-receipt {
+    transition: none;
+  }
+}
