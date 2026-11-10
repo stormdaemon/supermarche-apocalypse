@@ -22,7 +22,7 @@ export const EXTINGUISHER_CONFIG = {
   },
   recoil: {
     /** Backwards speed applied to the player while spraying, in m/s. */
-    speed: 5,
+    speed: 2.5,
   },
   smoke: {
     /** Particles emitted on every fixed step while spraying. */
