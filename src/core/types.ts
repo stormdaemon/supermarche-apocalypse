@@ -29,7 +29,10 @@ export class Health {
 /** Describes one hit dealt through game.combat.hit(). */
 export interface HitInfo {
   damage: number;
-  /** Impulse applied to the target, in world space. */
+  /**
+   * Knockback as a velocity change in m/s (world space), divided by the target's sturdiness.
+   * 5 is a light shove, 10 a strong hit, 20 sends someone flying.
+   */
   force: THREE.Vector3;
   point?: THREE.Vector3;
   source?: Entity | null;
