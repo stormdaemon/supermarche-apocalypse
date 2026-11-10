@@ -161,7 +161,10 @@ class PereCaddie extends BaseEnemy {
       [
         RAPIER.ColliderDesc.cuboid(CFG.cart.width / 2, CFG.cart.height / 2, CFG.cart.length / 2)
           .setFriction(0.2)
-          .setCollisionGroups(groups(Groups.PROP)),
+          // The pushed cart ignores enemies (its owner included); the periodic shove handles them.
+          .setCollisionGroups(
+            groups(Groups.PROP, Groups.STATIC | Groups.PLAYER | Groups.PROP | Groups.WEAPON),
+          ),
       ],
     );
     this.cartMesh = buildCartMesh();
