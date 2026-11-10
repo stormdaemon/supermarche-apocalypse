@@ -11,6 +11,11 @@ export class GameTime {
   scale = 1;
   private freezeRemaining = 0;
 
+  /** True while a hitstop freezes the simulation. */
+  get frozen(): boolean {
+    return this.freezeRemaining > 0;
+  }
+
   /** Freezes the simulation for a short real-time duration (seconds). */
   hitstop(duration: number): void {
     this.freezeRemaining = Math.max(this.freezeRemaining, duration);
