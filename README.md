@@ -21,6 +21,12 @@ npm run dev
 | `npm run lint`      | ESLint + vérification Prettier     |
 | `npm run format`    | Formate tout le code avec Prettier |
 
+## Jouer en ligne
+
+Une version jouable est publiée sur GitHub Pages : https://stormdaemon.github.io/supermarche-apocalypse/
+
+Le déploiement se fait automatiquement à chaque push sur `main` (workflow `.github/workflows/deploy-pages.yml`). Il faut l'activer une seule fois dans les réglages du dépôt : **Settings > Pages > Source : GitHub Actions**.
+
 ## Contrôles
 
 | Touche                | Action                                      |
