@@ -15,7 +15,7 @@ export interface ChimeNote {
 /** Balancing values of the wave system. Every number tuned by hand lives here. */
 export const WAVE_CONFIG = {
   /** Seconds between the start of the run and the first wave. */
-  firstWaveDelay: 4,
+  firstWaveDelay: 2,
   /** Seconds of store-light crackling between two waves. */
   pauseDuration: 6,
   /** Enemies in wave 1, before the difficulty trend and the surprise multiplier. */
@@ -35,19 +35,35 @@ export const WAVE_CONFIG = {
   },
 
   rush: {
-    /** Enemies entering through the doors at the same instant. */
+    /** Enemies entering at the same instant. */
     perBurst: 4,
     /** Seconds between two bursts of the rush. */
     burstInterval: 0.25,
-    /** Random offset around a door point, so enemies do not overlap. */
+    /** Random offset around a door point, so enemies do not overlap (boss and fallback). */
     offsetX: 1,
     offsetZ: 0.6,
     /** Height at which enemies are spawned. */
     spawnY: 0.2,
     /** Sound of the doors opening. */
     whoosh: { duration: 0.35, volume: 0.12, filterFreq: 1800 },
-    /** Colours of the dust puffs at the doors. */
+    /** Colours of the dust puffs where enemies appear. */
     dustColors: [0xf2efe6, 0xc9d6df, 0xffe066],
+    /** Particles of the dust puff at each spawn point. */
+    poofCount: 8,
+  },
+
+  /** Normal enemies appear close to the player, so the action is on screen right away. */
+  nearSpawn: {
+    /** Distance from the player's feet to the spawn point, in metres. */
+    distance: { min: 7, max: 11 } satisfies Range,
+    /** Half angle (radians) of the arc around the screen-up direction where enemies can appear. */
+    arcHalfAngle: 1.8,
+    /** Margin kept between a spawn point and the arena walls, in metres. */
+    wallMargin: 1.5,
+    /** Free radius required around a spawn point: no shelf, counter or crate inside. */
+    clearance: 0.7,
+    /** Random spots tried before falling back to a door. */
+    attempts: 8,
   },
 
   boss: {

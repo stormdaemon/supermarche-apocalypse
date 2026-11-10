@@ -1,6 +1,7 @@
 ﻿import * as THREE from 'three';
 import { defineFeature } from '../../core/feature';
 import type { Game } from '../../core/game';
+import { Groups, groups } from '../../core/physics';
 import { type Range, WAVE_CONFIG } from './config';
 
 /** One enemy scheduled in the rush of a wave. */
@@ -53,6 +54,10 @@ class WaveManager {
   private flickerTimer = 0;
   private readonly lights: LightState[] = [];
   private readonly doorOffset = new THREE.Vector3();
+  /** Reused spawn point, handed to the enemy manager (which copies what it needs). */
+  private readonly spawnPoint = new THREE.Vector3();
+  /** Reused centre of the free-space probe around a candidate spawn point. */
+  private readonly probe = new THREE.Vector3();
 
   constructor(private readonly game: Game) {
     game.scene.traverse((object) => {
@@ -200,28 +205,24 @@ class WaveManager {
     // Only one boss at a time: a leftover from an earlier wave blocks the new one.
     if (entry.boss && this.bossAlive()) return;
 
-    const doors = game.arena.layout.doors;
-    const burst = Math.floor(index / rush.perBurst);
-    const door = doors.length > 0 ? doors[burst % doors.length] : undefined;
-    if (!door) return;
-
-    this.doorOffset.set(randomSigned(rush.offsetX), 0, randomSigned(rush.offsetZ));
-    const position = door.clone().add(this.doorOffset);
-    position.y = rush.spawnY;
+    // Normal clients appear close to the player; the boss keeps walking in through a door.
+    const position = entry.boss
+      ? this.doorPoint(index)
+      : (this.nearPoint() ?? this.doorPoint(index));
+    if (!position) return;
     const enemy = game.enemies.spawn(entry.typeId, position);
 
-    if (index % rush.perBurst === 0) {
-      game.fx.burst({
-        position: door.clone().setY(0.8),
-        color: [...rush.dustColors],
-        count: 14,
-        shape: 'box',
-        size: 0.2,
-        speed: 2.5,
-        life: 0.6,
-        gravity: -1,
-      });
-    }
+    // A dust puff at every spawn point makes each arrival readable.
+    game.fx.burst({
+      position: position.clone().setY(0.8),
+      color: [...rush.dustColors],
+      count: rush.poofCount,
+      shape: 'box',
+      size: 0.2,
+      speed: 2.5,
+      life: 0.6,
+      gravity: -1,
+    });
     if (index === 0) {
       game.audio.noise({
         duration: rush.whoosh.duration,
@@ -230,6 +231,53 @@ class WaveManager {
       });
     }
     if (entry.boss && enemy) this.announce(WAVE_CONFIG.announcement.bossLine);
+  }
+
+  /**
+   * Random free point on a ring around the player, inside the camera view and the arena.
+   * Returns null when no spot is free after a few attempts.
+   */
+  private nearPoint(): THREE.Vector3 | null {
+    const { game } = this;
+    const { nearSpawn, rush } = WAVE_CONFIG;
+    const { halfWidth, halfDepth } = game.arena.layout;
+    const player = game.player.position;
+    // The camera looks towards -Z, so the arc is centred on the screen-up direction.
+    for (let attempt = 0; attempt < nearSpawn.attempts; attempt++) {
+      const angle = Math.PI + randomSigned(nearSpawn.arcHalfAngle);
+      const distance = randomBetween(nearSpawn.distance);
+      const x = player.x + Math.sin(angle) * distance;
+      const z = player.z + Math.cos(angle) * distance;
+      const margin = nearSpawn.wallMargin;
+      if (Math.abs(x) > halfWidth - margin) continue;
+      if (Math.abs(z) > halfDepth - margin) continue;
+
+      this.probe.set(x, rush.spawnY + 0.7, z);
+      const blocked = game.physics.overlapSphere(
+        this.probe,
+        nearSpawn.clearance,
+        groups(Groups.ALL, Groups.STATIC | Groups.PROP),
+      );
+      if (blocked.length > 0) continue;
+
+      this.spawnPoint.set(x, rush.spawnY, z);
+      return this.spawnPoint;
+    }
+    return null;
+  }
+
+  /** Point just inside a door, used by the boss and as the fallback when no near spot is free. */
+  private doorPoint(index: number): THREE.Vector3 | null {
+    const { rush } = WAVE_CONFIG;
+    const doors = this.game.arena.layout.doors;
+    const burst = Math.floor(index / rush.perBurst);
+    const door = doors.length > 0 ? doors[burst % doors.length] : undefined;
+    if (!door) return null;
+
+    this.doorOffset.set(randomSigned(rush.offsetX), 0, randomSigned(rush.offsetZ));
+    this.spawnPoint.copy(door).add(this.doorOffset);
+    this.spawnPoint.y = rush.spawnY;
+    return this.spawnPoint;
   }
 
   private bossAlive(): boolean {
