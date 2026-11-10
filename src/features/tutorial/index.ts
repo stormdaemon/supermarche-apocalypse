@@ -484,6 +484,10 @@ export default defineFeature({
     const tutorial = new Tutorial(game);
     game.input.bind('f1', 'custom:tutorial');
     game.input.onPress('custom:tutorial', () => tutorial.start());
+    // Keeps F1 from opening the browser help page.
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'F1') e.preventDefault();
+    });
     if (!readDone()) tutorial.start();
   },
 });
