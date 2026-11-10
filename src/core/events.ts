@@ -13,6 +13,8 @@ export interface GameEvents {
   };
   death: { entity: Entity; killer: Entity | null; position: THREE.Vector3 };
   knockout: { entity: Entity; duration: number };
+  /** An enemy gets back up after a stagger or knockout. */
+  recover: { entity: Entity };
   waveStart: { wave: number; enemyCount: number };
   waveEnd: { wave: number };
   pickup: { itemId: string; by: Entity };
@@ -25,6 +27,10 @@ export interface GameEvents {
   scoreChange: { score: number; delta: number; combo: number };
   playerDeath: { position: THREE.Vector3 };
   playerRespawn: Record<string, never>;
+  playerJump: Record<string, never>;
+  playerDodge: Record<string, never>;
+  /** Bare-hand or weapon attack started by the player; combo is the step in the chain (1-based). */
+  playerAttack: { combo: number; hits: number };
   pause: Record<string, never>;
   resume: Record<string, never>;
   /** Fired by game.restart(): every feature must clear its runtime state. */
