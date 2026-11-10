@@ -1,5 +1,5 @@
-/** Logical actions the game reads, independent of the physical keys. */
-export type Action =
+/** Core actions; features may bind their own as `custom:<name>`. */
+export type CoreAction =
   | 'forward'
   | 'back'
   | 'left'
@@ -12,7 +12,10 @@ export type Action =
   | 'pause'
   | 'debug';
 
-// ZQSD (AZERTY) and WASD (QWERTY) are both mapped by the produced character.
+/** Logical actions the game reads, independent of the physical keys. */
+export type Action = CoreAction | `custom:${string}`;
+
+// ZQSD (AZERTY) and WASD (QWERTY) are both mapped through the produced character.
 const KEY_BINDINGS: Record<string, Action> = {
   z: 'forward',
   w: 'forward',
@@ -37,17 +40,16 @@ const MOUSE_BINDINGS: Record<number, Action> = { 0: 'attack', 2: 'throw' };
 /**
  * Keyboard and mouse state. Edge-triggered "pressed" actions persist until the next
  * fixed step consumes them so that no press is lost between physics ticks.
+ * The cursor position is exposed in normalized device coordinates for aiming.
  */
 export class Input {
   private readonly down = new Set<Action>();
   private readonly pressedQueue = new Set<Action>();
-  private readonly pressedFrame = new Set<Action>();
   private readonly listeners = new Map<Action, Set<() => void>>();
-  /** Mouse movement accumulated since the last camera read. */
-  mouseDelta = { x: 0, y: 0 };
-  pointerLocked = false;
+  /** Cursor position in normalized device coordinates ([-1, 1] on both axes). */
+  readonly pointer = { x: 0, y: 0 };
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement) {
     window.addEventListener('keydown', (e) => {
       const action = KEY_BINDINGS[e.key.toLowerCase()];
       if (!action) return;
@@ -59,10 +61,6 @@ export class Input {
       if (action) this.down.delete(action);
     });
     canvas.addEventListener('mousedown', (e) => {
-      if (!this.pointerLocked) {
-        void canvas.requestPointerLock();
-        return;
-      }
       const action = MOUSE_BINDINGS[e.button];
       if (action) this.press(action);
     });
@@ -71,21 +69,22 @@ export class Input {
       if (action) this.down.delete(action);
     });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-    document.addEventListener('pointerlockchange', () => {
-      this.pointerLocked = document.pointerLockElement === canvas;
-    });
     window.addEventListener('mousemove', (e) => {
-      if (!this.pointerLocked) return;
-      this.mouseDelta.x += e.movementX;
-      this.mouseDelta.y += e.movementY;
+      const rect = canvas.getBoundingClientRect();
+      this.pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      this.pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     });
     window.addEventListener('blur', () => this.down.clear());
+  }
+
+  /** Binds an extra key (KeyboardEvent.key, lowercase) to an action. */
+  bind(key: string, action: Action): void {
+    KEY_BINDINGS[key.toLowerCase()] = action;
   }
 
   private press(action: Action): void {
     this.down.add(action);
     this.pressedQueue.add(action);
-    this.pressedFrame.add(action);
     this.listeners.get(action)?.forEach((cb) => cb());
   }
 
@@ -99,11 +98,6 @@ export class Input {
     return this.pressedQueue.has(action);
   }
 
-  /** True during the first rendered frame after the action was pressed. */
-  pressedThisFrame(action: Action): boolean {
-    return this.pressedFrame.has(action);
-  }
-
   /** Runs a callback immediately on press, even while the game is paused. */
   onPress(action: Action, cb: () => void): () => void {
     let set = this.listeners.get(action);
@@ -115,7 +109,7 @@ export class Input {
     return () => set.delete(cb);
   }
 
-  /** Movement axes in [-1, 1]: x = strafe right, y = forward. */
+  /** Movement axes in [-1, 1]: x = right, y = forward (towards the top of the screen). */
   moveAxes(): { x: number; y: number } {
     const x = (this.isDown('right') ? 1 : 0) - (this.isDown('left') ? 1 : 0);
     const y = (this.isDown('forward') ? 1 : 0) - (this.isDown('back') ? 1 : 0);
@@ -123,22 +117,7 @@ export class Input {
     return { x: x / len, y: y / len };
   }
 
-  consumeMouseDelta(): { x: number; y: number } {
-    const delta = { ...this.mouseDelta };
-    this.mouseDelta.x = 0;
-    this.mouseDelta.y = 0;
-    return delta;
-  }
-
   endFixedStep(): void {
     this.pressedQueue.clear();
-  }
-
-  endFrame(): void {
-    this.pressedFrame.clear();
-  }
-
-  releasePointer(): void {
-    if (this.pointerLocked) document.exitPointerLock();
   }
 }
