@@ -206,7 +206,7 @@ export class Player implements Hittable {
   }
 
   applyHit(info: HitInfo): void {
-    this.applyImpulse(info.force.clone().multiplyScalar(0.15));
+    this.applyImpulse(info.force.clone().multiplyScalar(0.6));
     this.lockControl(Math.min(info.stun ?? 0.15, 0.4));
     this.rig.trigger('hurt', 0.3);
   }
