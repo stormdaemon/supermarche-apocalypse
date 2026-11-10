@@ -194,12 +194,18 @@ export class WeaponSystem {
     weapon.object.getWorldQuaternion(worldQuat);
     this.game.scene.add(weapon.object);
     const player = this.game.player;
-    const start = thrown
-      ? player.position
-          .clone()
-          .setY(player.position.y + 1.3)
-          .addScaledVector(ctx.aimDir, 0.8)
-      : worldPos;
+    const start = worldPos;
+    if (thrown) {
+      // Start in front of the chest, but never inside a wall or shelf.
+      const chest = player.position.clone().setY(player.position.y + 1.3);
+      const wall = this.game.physics.raycast(
+        chest,
+        ctx.aimDir,
+        0.9,
+        groups(Groups.ALL, Groups.STATIC),
+      );
+      start.copy(chest).addScaledVector(ctx.aimDir, wall ? Math.max(0, wall.distance - 0.3) : 0.8);
+    }
     weapon.body.setTranslation(start, true);
     weapon.body.setRotation(worldQuat, true);
     weapon.body.setEnabled(true);
@@ -220,7 +226,11 @@ export class WeaponSystem {
   }
 
   remove(weapon: Weapon): void {
-    if (this.held === weapon) this.held = null;
+    if (this.held === weapon) {
+      this.held = null;
+      weapon.onDrop(this.context(), false);
+      this.game.events.emit('weaponDrop', { weaponId: weapon.id, thrown: false });
+    }
     this.items.delete(weapon);
     this.thrownUntil.delete(weapon);
     weapon.dispose(this.game);

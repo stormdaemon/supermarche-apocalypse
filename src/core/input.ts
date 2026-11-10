@@ -1,5 +1,5 @@
-/** Logical actions the game reads, independent of the physical keys. */
-export type Action =
+/** Core actions; features may bind their own as `custom:<name>`. */
+export type CoreAction =
   | 'forward'
   | 'back'
   | 'left'
@@ -11,6 +11,9 @@ export type Action =
   | 'throw'
   | 'pause'
   | 'debug';
+
+/** Logical actions the game reads, independent of the physical keys. */
+export type Action = CoreAction | `custom:${string}`;
 
 // ZQSD (AZERTY) and WASD (QWERTY) are both mapped through the produced character.
 const KEY_BINDINGS: Record<string, Action> = {
@@ -72,6 +75,11 @@ export class Input {
       this.pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     });
     window.addEventListener('blur', () => this.down.clear());
+  }
+
+  /** Binds an extra key (KeyboardEvent.key, lowercase) to an action. */
+  bind(key: string, action: Action): void {
+    KEY_BINDINGS[key.toLowerCase()] = action;
   }
 
   private press(action: Action): void {

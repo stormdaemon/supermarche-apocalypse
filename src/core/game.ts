@@ -52,6 +52,8 @@ export class Game {
   motor: PlayerMotor;
   private readonly loop: GameLoop;
   private pausedState = false;
+  private restartRequested = false;
+  private autoRestartTimer: number | undefined;
 
   constructor(
     container: HTMLElement,
@@ -65,6 +67,9 @@ export class Game {
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    // Only the static decor casts real shadows, so the shadow map is rendered on demand.
+    this.renderer.shadowMap.autoUpdate = false;
+    this.renderer.shadowMap.needsUpdate = true;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     container.append(this.renderer.domElement);
 
@@ -94,7 +99,8 @@ export class Game {
       this.events.emit('playerDeath', { position: this.player.position.clone() });
       if (this.autoRestartOnDeath) {
         this.ui.toast('K.O. ! On recommence...', 2.5);
-        window.setTimeout(() => this.restart(), 3000);
+        window.clearTimeout(this.autoRestartTimer);
+        this.autoRestartTimer = window.setTimeout(() => this.restart(), 3000);
       }
     });
 
@@ -135,8 +141,24 @@ export class Game {
     this.loop.start();
   }
 
-  /** Clears every runtime object and puts the player back at the entrance. */
+  /** Re-renders the static shadow map (call after moving shadow-casting decor). */
+  invalidateShadows(): void {
+    this.renderer.shadowMap.needsUpdate = true;
+  }
+
+  /**
+   * Clears every runtime object and puts the player back at the entrance.
+   * The restart happens at the start of the next frame, so it is safe to call from
+   * any event listener or system.
+   */
   restart(): void {
+    this.restartRequested = true;
+  }
+
+  private performRestart(): void {
+    this.restartRequested = false;
+    window.clearTimeout(this.autoRestartTimer);
+    this.autoRestartTimer = undefined;
     this.enemies.clear();
     this.pickups.clear();
     this.surfaces.clear();
@@ -148,6 +170,7 @@ export class Game {
     this.motor.reset?.();
     this.score.reset();
     this.time.scale = 1;
+    this.invalidateShadows();
     this.events.emit('reset', {});
     this.events.emit('playerRespawn', {});
   }
@@ -170,7 +193,8 @@ export class Game {
   }
 
   private render(frameDt: number, alpha: number): void {
-    const dt = this.paused ? 0 : frameDt * this.time.scale;
+    if (this.restartRequested) this.performRestart();
+    const dt = this.paused || this.time.frozen ? 0 : frameDt * this.time.scale;
     this.physics.sync(alpha);
     this.player.update(dt);
     this.enemies.update(dt);

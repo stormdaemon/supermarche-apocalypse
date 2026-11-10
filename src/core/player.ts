@@ -125,7 +125,8 @@ export class Player implements Hittable {
 
   /** Adds a decaying push (m/s). */
   applyImpulse(velocity: THREE.Vector3): void {
-    this.externalVelocity.add(velocity);
+    this.externalVelocity.x += velocity.x;
+    this.externalVelocity.z += velocity.z;
     if (velocity.y > 0) this.velocity.y = Math.max(this.velocity.y, velocity.y);
   }
 

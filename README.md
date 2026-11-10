@@ -98,6 +98,15 @@ Le registre trouve le dossier tout seul : aucune ligne à ajouter ailleurs.
 | `game.ui`                                     | Calque DOM : `slot('top-left')`, `add()`, `toast()`                                                                                   |
 | `game.arena.layout`                           | Points nommés : portes, rayons, caisses, spots d'armes et de pièges                                                                   |
 
+Autres points d'extension :
+
+- Événements propres à une feature : augmenter l'interface `GameEvents` dans le dossier de la feature (`declare module '../../core/events' { interface GameEvents { monEvent: {...} } }`).
+- Touches supplémentaires : `game.input.bind('r', 'custom:respawn')` puis `game.input.pressed('custom:respawn')`.
+- Poser un ennemi librement (ragdoll, prise de catch) : `enemy.visualOverride = true` ; l'événement `recover` signale qu'il se relève.
+- Toucher des props au corps à corps : `meleeSweep({ ..., extraMask: Groups.PROP })`.
+- Redémarrer : `game.restart()` est différé à l'image suivante, donc sans danger depuis un listener. Les features qui créent leurs propres corps (rayons dynamiques…) les recréent sur l'événement `reset`.
+- Décor qui bouge et projette une ombre : appeler `game.invalidateShadows()` (la shadow map n'est recalculée qu'à la demande).
+
 Providers remplaçables (le plus prioritaire gagne) : `playerMotor` (déplacement du joueur) et `shelf` (construction d'un rayon).
 
 ### Ajouter un ennemi

@@ -280,6 +280,9 @@ export class Arena {
       const crate = prim.box(1, 1, 1, PALETTE.brown);
       const band = prim.box(1.02, 0.15, 1.02, PALETTE.yellow);
       crate.add(band);
+      // Crates move, and the shadow map is static: they use no real shadow.
+      crate.castShadow = false;
+      band.castShadow = false;
       scene.add(crate);
       const body = physics.createBody(
         RAPIER.RigidBodyDesc.dynamic().setTranslation(x, y, z),

@@ -67,6 +67,13 @@ export interface Enemy extends Hittable {
   readonly state: EnemyState;
   /** Disables AI and locomotion for a duration (ragdolls, grabs, traps). */
   knockOut(duration: number): void;
+  /**
+   * While true the enemy stops driving its rig transform and animation, so a feature
+   * (ragdoll, grab) can pose it freely.
+   */
+  visualOverride: boolean;
+  /** True once the enemy can be removed from the game (death animation over). */
+  readonly finished: boolean;
   fixedUpdate(dt: number): void;
   update(dt: number): void;
   dispose(): void;

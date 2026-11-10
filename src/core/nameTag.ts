@@ -40,7 +40,15 @@ export function createTextSprite(
   return sprite;
 }
 
-/** Floating name label placed above a character's head. */
+const nameTagCache = new Map<string, THREE.Sprite>();
+
+/** Floating name label placed above a character's head. Textures are shared per name. */
 export function createNameTag(name: string, color = '#ffe066'): THREE.Sprite {
-  return createTextSprite(name, { color, height: 0.32 });
+  const key = `${name}|${color}`;
+  let template = nameTagCache.get(key);
+  if (!template) {
+    template = createTextSprite(name, { color, height: 0.32 });
+    nameTagCache.set(key, template);
+  }
+  return template.clone();
 }

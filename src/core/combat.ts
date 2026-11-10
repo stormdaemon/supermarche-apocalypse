@@ -17,6 +17,8 @@ export interface MeleeSweep {
   exclude?: Entity | null;
   /** Restricts the sweep to enemies (default) or also hits the player. */
   hitPlayer?: boolean;
+  /** Extra collision groups to sweep (e.g. Groups.PROP for hittable props). */
+  extraMask?: number;
 }
 
 /** Central damage pipeline: every hit, sweep and explosion goes through here. */
@@ -36,7 +38,8 @@ export class Combat {
   /** Damages a target, applies its physical reaction and emits hit/death events. */
   hit(target: Hittable, info: HitInfo): boolean {
     const health = target.health;
-    if (health.dead || this.time.elapsed < health.invulnerableUntil) return false;
+    if (!target.entity.alive || health.dead || this.time.elapsed < health.invulnerableUntil)
+      return false;
     health.current = Math.max(0, health.current - info.damage);
     target.applyHit(info);
     const point = info.point ?? target.position.clone().setY(target.position.y + 1);
@@ -59,9 +62,22 @@ export class Combat {
     return true;
   }
 
+  /** Kills a target outright (falls, traps) and emits the death event. */
+  kill(target: Hittable, source: Entity | null = null): void {
+    if (target.health.dead || !target.entity.alive) return;
+    target.health.current = 0;
+    target.health.dead = true;
+    this.events.emit('death', {
+      entity: target.entity,
+      killer: source,
+      position: target.position.clone(),
+    });
+  }
+
   /** Hits every target inside a horizontal cone in front of the origin. */
   meleeSweep(sweep: MeleeSweep): Hittable[] {
-    const mask = sweep.hitPlayer ? Groups.ENEMY | Groups.PLAYER : Groups.ENEMY;
+    const mask =
+      (sweep.hitPlayer ? Groups.ENEMY | Groups.PLAYER : Groups.ENEMY) | (sweep.extraMask ?? 0);
     const center = sweep.origin;
     const candidates = this.physics.entitiesInSphere(center, sweep.range, groups(Groups.ALL, mask));
     const hits: Hittable[] = [];

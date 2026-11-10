@@ -72,6 +72,7 @@ export class BaseEnemy implements Enemy {
   readonly position = new THREE.Vector3();
   readonly nameTag: THREE.Sprite;
   state: EnemyState = 'active';
+  visualOverride = false;
   /** Where the enemy currently wants to go. */
   protected readonly goal = new THREE.Vector3();
   protected facing = 0;
@@ -84,6 +85,7 @@ export class BaseEnemy implements Enemy {
   protected chasingPlayer = true;
   private readonly centerOffset: number;
   private readonly tmp = new THREE.Vector3();
+  private readonly deadOffset = new THREE.Vector3();
 
   constructor(
     protected readonly game: Game,
@@ -189,7 +191,12 @@ export class BaseEnemy implements Enemy {
   fixedUpdate(dt: number): void {
     const t = this.body.translation();
     this.position.set(t.x, t.y - this.centerOffset, t.z);
-    if (t.y < -10) this.health.dead = true;
+    if (t.y < -10 && this.state !== 'dead') {
+      this.game.combat.kill(this, null);
+      this.state = 'dead';
+      this.deathTimer = 0;
+      return;
+    }
 
     if (this.state === 'dead') {
       this.deathTimer -= dt;
@@ -197,7 +204,10 @@ export class BaseEnemy implements Enemy {
     }
     if (this.state === 'stunned' || this.state === 'knockedOut') {
       this.stunTimer -= dt;
-      if (this.stunTimer <= 0) this.state = 'active';
+      if (this.stunTimer <= 0) {
+        this.state = 'active';
+        this.game.events.emit('recover', { entity: this.entity });
+      }
       return;
     }
 
@@ -239,9 +249,14 @@ export class BaseEnemy implements Enemy {
   }
 
   update(dt: number): void {
+    if (this.visualOverride) return;
     if (this.state === 'dead') {
+      // The tumbling body rotates around its center, not around the feet pivot.
       const r = this.body.rotation();
+      const t = this.body.translation();
       this.rig.root.quaternion.set(r.x, r.y, r.z, r.w);
+      this.deadOffset.set(0, -this.centerOffset, 0).applyQuaternion(this.rig.root.quaternion);
+      this.rig.root.position.set(t.x, t.y, t.z).add(this.deadOffset);
       this.rig.animate(dt, 0);
       return;
     }
@@ -254,7 +269,7 @@ export class BaseEnemy implements Enemy {
 
   /** True once the death animation is over and the enemy can be removed. */
   get finished(): boolean {
-    return this.state === 'dead' ? this.deathTimer <= 0 : this.health.dead && this.position.y < -10;
+    return this.state === 'dead' && this.deathTimer <= 0;
   }
 
   dispose(): void {
@@ -292,9 +307,7 @@ export class EnemyManager {
       const enemy = this.list[i];
       if (!enemy) continue;
       enemy.fixedUpdate(dt);
-      const finished =
-        enemy instanceof BaseEnemy ? enemy.finished : enemy.health.dead && enemy.state === 'dead';
-      if (finished) {
+      if (enemy.finished) {
         this.game.fx.burst({
           position: enemy.position.clone().setY(enemy.position.y + 0.8),
           color: [0xffffff, 0xdddddd],

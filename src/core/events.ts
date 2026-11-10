@@ -13,6 +13,8 @@ export interface GameEvents {
   };
   death: { entity: Entity; killer: Entity | null; position: THREE.Vector3 };
   knockout: { entity: Entity; duration: number };
+  /** An enemy gets back up after a stagger or knockout. */
+  recover: { entity: Entity };
   waveStart: { wave: number; enemyCount: number };
   waveEnd: { wave: number };
   pickup: { itemId: string; by: Entity };
