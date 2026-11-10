@@ -139,7 +139,7 @@ export class BaseEnemy implements Enemy {
 
   applyHit(info: HitInfo): void {
     const impulse = info.force.clone().divideScalar(this.stats.sturdiness);
-    this.body.applyImpulse(impulse.multiplyScalar(this.stats.mass / 10), true);
+    this.body.applyImpulse(impulse.multiplyScalar(this.stats.mass), true);
     if (this.state === 'active') this.state = 'stunned';
     this.stunTimer = Math.max(this.stunTimer, info.stun ?? CORE_CONFIG.enemy.staggerTime);
     this.windupTimer = -1;
