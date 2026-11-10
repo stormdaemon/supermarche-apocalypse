@@ -1,0 +1,41 @@
+/* Speech bubble of the contextual tips, drawn in the cartoon store style. */
+.ui-slot > .conseil-bubble {
+  position: relative;
+  pointer-events: none;
+  max-width: 80vw;
+  margin-bottom: 28px;
+  padding: 10px 22px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  color: #1b1b24;
+  background: #fff6c8;
+  border: 4px solid #1b1b24;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 #1b1b24;
+  animation: conseil-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+/* Little tail pointing down towards the player's feet. */
+.ui-slot > .conseil-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 14px solid #1b1b24;
+}
+
+@keyframes conseil-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
