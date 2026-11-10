@@ -1,0 +1,35 @@
+/* Dedicated health bar of the boss, drawn in the top-center UI slot. */
+.boss-vigile-bar {
+  box-sizing: border-box;
+  width: min(520px, 80vw);
+  padding: 6px 12px 8px;
+  background: rgba(20, 18, 31, 0.8);
+  border: 3px solid #e63946;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 2px 2px 0 #1b1b24;
+}
+
+.boss-vigile-name {
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.boss-vigile-track {
+  height: 16px;
+  margin-top: 4px;
+  background: #3a1d24;
+  border: 2px solid #1b1b24;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.boss-vigile-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(#ff7b7b, #e63946);
+  transition: width 0.2s ease-out;
+}
