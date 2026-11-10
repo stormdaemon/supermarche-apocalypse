@@ -1,0 +1,28 @@
+.ui-slot > .promo-banner {
+  margin-top: 56px;
+  max-width: 90vw;
+  padding: 10px 22px;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  white-space: pre-line;
+  color: #ffe066;
+  text-shadow:
+    3px 3px 0 #1b1b24,
+    -2px -2px 0 #1b1b24;
+  background: rgba(230, 57, 70, 0.9);
+  border: 3px solid #ffe066;
+  border-radius: 14px;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+  pointer-events: none;
+}
+
+.ui-slot > .promo-banner.promo-banner-visible {
+  opacity: 1;
+  transform: none;
+}
