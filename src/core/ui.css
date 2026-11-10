@@ -1,0 +1,149 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #14121f;
+  font-family: 'Trebuchet MS', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+#app,
+#app canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ui-slot {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.ui-slot > * {
+  pointer-events: auto;
+}
+
+.ui-top-left {
+  top: 0;
+  left: 0;
+}
+.ui-top-center {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+.ui-top-right {
+  top: 0;
+  right: 0;
+  align-items: flex-end;
+}
+.ui-bottom-left {
+  bottom: 0;
+  left: 0;
+}
+.ui-bottom-center {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+.ui-bottom-right {
+  bottom: 0;
+  right: 0;
+  align-items: flex-end;
+}
+.ui-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+}
+.ui-fullscreen {
+  inset: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.ui-toast {
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffe066;
+  text-shadow:
+    3px 3px 0 #1b1b24,
+    -2px -2px 0 #1b1b24;
+  animation: ui-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+  transition:
+    opacity 0.4s,
+    transform 0.4s;
+  white-space: nowrap;
+}
+
+.ui-toast-out {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+@keyframes ui-pop {
+  from {
+    transform: scale(0.3) rotate(-8deg);
+  }
+  to {
+    transform: scale(1) rotate(0);
+  }
+}
+
+.debug-panel {
+  font:
+    12px/1.4 ui-monospace,
+    Consolas,
+    monospace;
+  background: rgba(10, 10, 20, 0.82);
+  border: 1px solid #4cc9f0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-width: 220px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.debug-panel h4 {
+  margin: 8px 0 4px;
+  color: #4cc9f0;
+  font-size: 12px;
+}
+
+.debug-panel button {
+  font: inherit;
+  margin: 2px;
+  padding: 2px 6px;
+  background: #24243a;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.debug-panel button:hover {
+  background: #3a3a5a;
+}
+
+.interact-hint {
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(20, 18, 31, 0.75);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px solid #ffe066;
+}
