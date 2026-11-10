@@ -1,0 +1,155 @@
+/* Cartoon supermarket HUD. Sizes come from config.ts through CSS variables. */
+
+.hud-block[hidden],
+.hud-sign[hidden],
+.hud-weapon[hidden] {
+  display: none;
+}
+
+.ui-slot > .hud-block,
+.ui-slot > .hud-sign,
+.ui-slot > .hud-weapon {
+  pointer-events: none;
+}
+
+/* Hearts */
+
+.hud-hearts {
+  display: flex;
+  gap: 4px;
+}
+
+.hud-heart {
+  font-size: var(--hud-heart-size, 30px);
+  line-height: 1;
+  color: #3b3450;
+  filter: drop-shadow(2px 2px 0 #1b1b24);
+}
+
+.hud-heart--full {
+  color: #ff4d6d;
+}
+
+.hud-heart--half {
+  background: linear-gradient(90deg, #ff4d6d 50%, #3b3450 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hud-heart--empty {
+  color: #3b3450;
+}
+
+/* Score in euros saved */
+
+.hud-score {
+  font-size: var(--hud-score-size, 34px);
+  font-weight: 900;
+  color: #ffe066;
+  text-shadow:
+    3px 3px 0 #1b1b24,
+    -2px -2px 0 #1b1b24;
+  white-space: nowrap;
+  transform-origin: left center;
+}
+
+/* Combo stars */
+
+.hud-combo {
+  display: flex;
+  gap: 2px;
+}
+
+.hud-star {
+  font-size: var(--hud-star-size, 26px);
+  line-height: 1;
+  color: #4a4458;
+  text-shadow: 2px 2px 0 #1b1b24;
+  transition: color 0.15s;
+}
+
+.hud-star--on {
+  color: #ffe066;
+  animation: hud-star-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+@keyframes hud-star-pop {
+  from {
+    transform: scale(0.3) rotate(-30deg);
+  }
+  to {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Wave sign */
+
+.hud-sign {
+  font-size: var(--hud-wave-size, 22px);
+  font-weight: 900;
+  color: #fff;
+  background: #e63946;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  padding: 4px 14px;
+  box-shadow: 3px 3px 0 #1b1b24;
+  transform: rotate(-3deg);
+  white-space: nowrap;
+}
+
+/* Equipped weapon price tag */
+
+.hud-weapon {
+  display: flex;
+}
+
+.hud-tag {
+  position: relative;
+  transform-origin: 50% 0;
+  padding: 10px 18px 10px 34px;
+  background: #ffd400;
+  color: #1b1b24;
+  font-size: var(--hud-tag-size, 22px);
+  font-weight: 900;
+  white-space: nowrap;
+  border: 3px solid #1b1b24;
+  border-radius: 8px 14px 14px 8px;
+  box-shadow: 4px 4px 0 #1b1b24;
+  animation: hud-swing 2.6s ease-in-out infinite;
+}
+
+/* Hole of the tag, where the string goes through. */
+.hud-tag::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border: 2px solid #1b1b24;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* String tying the tag to the shelf above. */
+.hud-tag::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -26px;
+  width: 2px;
+  height: 26px;
+  background: #1b1b24;
+}
+
+@keyframes hud-swing {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
